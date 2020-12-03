@@ -35,10 +35,10 @@ func GetSessionBySessionID(sessionID string) (*model.Session, error) {
 	db:=common.GetDB()
 	sqlStr := "select session_id,username,user_id from sessions where session_id=?"
 
-	rows := db.QueryRow(sqlStr, sessionID)
+	row := db.QueryRow(sqlStr, sessionID)
 	//创建变量接收
 	sess := &model.Session{}
-	err := rows.Scan(&sess.SessionID, &sess.UserName, &sess.UserID)
+	err := row.Scan(&sess.SessionID, &sess.UserName, &sess.UserID)
 	return sess, err
 }
 

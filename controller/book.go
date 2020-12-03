@@ -3,7 +3,6 @@ package controller
 import (
 	"bookstore/dao"
 	"bookstore/model"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
@@ -22,13 +21,6 @@ func GetPageBooksByPageNo(ctx *gin.Context){
 	ctx.HTML(http.StatusOK,"index.html",page)
 }
 
-func PostPageBooksByPrice(ctx *gin.Context){
-	// 获取传入的页码
-	pageNo:=ctx.PostForm("pageNo")
-	min:=ctx.PostForm("min")
-	fmt.Println("min:",min)
-	fmt.Println("pageNo:",pageNo)
-}
 // 获取价格筛选分页的图书信息
 func GetPageBooksByPrice(ctx *gin.Context){
 	// 获取传入的页码

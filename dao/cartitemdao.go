@@ -6,15 +6,26 @@ import (
 )
 
 // 添加cartitem数据
-func AddCartItem(ci *model.CartItem)error{
+func AddCartItem(cartItem *model.CartItem,cart *model.Cart)error{
 	db:=common.GetDB()
+	tx,_:=db.Begin()
+	// 新增购物项
 	sqlStr := "insert into cart_items(count,amount,book_id,cart_id) values(?,?,?,?)"
-
 	//执行
-	_, err := db.Exec(sqlStr,ci.Count,ci.GetAmount(), ci.Book.ID, ci.CartID)
+	_, err := tx.Exec(sqlStr,cartItem.Count,cartItem.GetAmount(), cartItem.Book.ID, cartItem.CartID)
 	if err != nil {
+		tx.Rollback()
 		return err
 	}
+	// 更新购物车
+	sqlStr = "update carts set total_count=?,total_amount=? where id=?"
+
+	_, err = tx.Exec(sqlStr, cart.GetTotalCount(), cart.GetTotalAmount(), cart.CartID)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	tx.Commit()
 	return nil
 }
 
@@ -44,6 +55,7 @@ func GetCartItemsByCartID(cartID string) ([]*model.CartItem, error) {
 
 	//执行
 	rows, err := db.Query(sqlStr, cartID)
+	defer rows.Close()
 	if err != nil {
 		return nil, err
 	}
@@ -66,14 +78,28 @@ func GetCartItemsByCartID(cartID string) ([]*model.CartItem, error) {
 }
 
 //根据图书id和购物车id以及图书的数量更新购物项中的图书数量和金额
-func UpdateBookCount(cartItem *model.CartItem) error {
+func UpdateBookCount(cartItem *model.CartItem,cart *model.Cart) error {
 	db:=common.GetDB()
+	// 开启事务，更新购物项和购物车数据一致
+	tx,_:=db.Begin()
+	// 更新购物项
 	sqlStr := "update cart_items set count=?,amount=? where book_id=? and cart_id=?"
 
-	_, err := db.Exec(sqlStr, cartItem.Count, cartItem.GetAmount(), cartItem.Book.ID, cartItem.CartID)
+	_, err := tx.Exec(sqlStr, cartItem.Count, cartItem.GetAmount(), cartItem.Book.ID, cartItem.CartID)
 	if err != nil {
+		tx.Rollback()
 		return err
 	}
+	// 更新购物车
+	sqlStr= "update carts set total_count=?,total_amount=? where id=?"
+
+	_, err = tx.Exec(sqlStr, cart.GetTotalCount(), cart.GetTotalAmount(), cart.CartID)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	tx.Commit()
 	return nil
 }
 
@@ -90,13 +116,24 @@ func DeleteCartItemsByCartID(cartID string) error {
 }
 
 //根据购物项id删除购物项信息
-func DeleteCartItemByID(cartItemID string) error {
+func DeleteCartItemByID(cartItemID string,cart *model.Cart) error {
 	db:=common.GetDB()
+	tx,_:=db.Begin()
 	sqlStr := "delete from cart_items where id=?"
 	//执行
 	_, err := db.Exec(sqlStr, cartItemID)
 	if err != nil {
+		tx.Rollback()
 		return err
 	}
+
+	sqlStr = "update carts set total_count=?,total_amount=? where id=?"
+
+	_, err = db.Exec(sqlStr, cart.GetTotalCount(), cart.GetTotalAmount(), cart.CartID)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	tx.Commit()
 	return nil
 }

@@ -11,7 +11,7 @@ func GetUserByUsernameAndPassword(username,password string)(*model.User,error){
 	db:=common.GetDB()
 	sqlStr:="select id,username,password,email from users where username=?"
 
-	row:=db.QueryRow(sqlStr,username,password)
+	row:=db.QueryRow(sqlStr,username)
 	user:=model.User{}
 	// 创建一个user变量
 	err:=row.Scan(&user.ID,&user.Username,&user.Password,&user.Email)

@@ -25,7 +25,7 @@ func GetOrderItemsByOrderID(orderID string) ([]*model.OrderItem, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	defer rows.Close()
 	//将数据库数据赋值给orderitem变量
 	var orderItems []*model.OrderItem
 	for rows.Next() {

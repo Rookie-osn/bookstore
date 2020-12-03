@@ -29,6 +29,10 @@ func InitDB(){
 		panic(err.Error())
 	}
 	DB=db
+	// 设置最大连接数
+	DB.SetMaxOpenConns(5000)
+	// 设置闲置连接数
+	DB.SetMaxIdleConns(2500)
 }
 
 // 获取DB

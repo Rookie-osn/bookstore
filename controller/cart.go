@@ -31,8 +31,8 @@ func AddBookToCart(ctx *gin.Context){
 					if v.Book.ID==cartItem.Book.ID{
 						// 将购物车的count+1
 						v.Count++
-						// 更新数据库中该购物项的图书数量
-						dao.UpdateBookCount(v)
+						// 更新数据库中该购物项的图书数量并更新数据库中购物车的总数量和总价格
+						dao.UpdateBookCount(v,cart)
 					}
 				}
 			}else{
@@ -44,11 +44,11 @@ func AddBookToCart(ctx *gin.Context){
 				}
 				// 将购物项添加到切片中
 				cart.CartItems=append(cart.CartItems,newCartItem)
-				// 将新购物项加入到数据库
-				dao.AddCartItem(newCartItem)
+				// 将新购物项加入到数据库并更新数据库中购物车的总数量和总价格
+				dao.AddCartItem(newCartItem,cart)
 			}
-			// 更新数据库中购物车的总数量和总价格
-			dao.UpdateCart(cart)
+			//// 更新数据库中购物车的总数量和总价格
+			//dao.UpdateCart(cart)
 		}else{
 			// 当前用户没有购物车，创建一个购物车添加到数据库
 			cartID:=common.CreateUUID()
@@ -135,12 +135,10 @@ func DeleteCartItem(ctx *gin.Context){
 			cartItems=append(cartItems[:k],cartItems[k+1:]...)
 			cart.CartItems=cartItems
 			// 从数据库中删除当前购物项信息
-			dao.DeleteCartItemByID(cartItemID)
+			dao.DeleteCartItemByID(cartItemID,cart)
 		}
 	}
 
-	// 更新购物车中的图书总数量和总金额
-	dao.UpdateCart(cart)
 	// 再次查询购物车信息
 	GetCartInfo(ctx)
 }
@@ -164,13 +162,10 @@ func UpdateCartItem(ctx *gin.Context){
 		if v.CartItemID==iCartItemID{
 			// 将图书数量赋值给购物项
 			v.Count=ibookCount
-			// 从数据库中更新购物项信息
-			dao.UpdateBookCount(v)
+			// 从数据库中更新购物项信息并更新购物车信息
+			dao.UpdateBookCount(v,cart)
 		}
 	}
-
-	// 更新购物车中的图书总数量和总金额
-	dao.UpdateCart(cart)
 	// 再次查询购物车信息
 	GetCartInfo(ctx)
 }

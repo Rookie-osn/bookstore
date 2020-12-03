@@ -28,29 +28,8 @@ func Checkout(ctx *gin.Context){
 		State:0,
 		UserID: int64(userID),
 	}
-	// 将订单添加入库
-	dao.AddOrder(order)
-	// 遍历订单项，加入orderitem库
-	cis:=cart.CartItems
-	for _,v:=range cis{
-		orderItem:=&model.OrderItem{
-			Count: v.Count,
-			Amount: v.Amount,
-			Title: v.Book.Title,
-			Author: v.Book.Author,
-			Price: v.Book.Price,
-			ImgPath: v.Book.ImgPath,
-			OrderID: orderID,
-		}
-		// 添加入库
-		dao.AddOrderItem(orderItem)
-		// 将库存和销量更新
-		book:=v.Book
-		book.Sales=book.Sales+int(v.Count)
-		book.Stock=book.Stock-int(v.Count)
-		// 更新图书信息
-		dao.UpdateBook(book)
-	}
+	// 将订单添加入库，更新订单信息，更新订单项信息，更新图书信息（数量）
+	dao.AddOrderA(order,cart)
 
 	// 删除购物车
 	dao.DeleteCartByCartID(cart.CartID)

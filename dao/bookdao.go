@@ -119,6 +119,7 @@ func GetPageBooksByPageNo(pageNo string) (*model.Page, error) {
 	sqlStr = "select id,title,author,price,sales,stock,img_path from books limit ?,?"
 	//执行
 	rows, err := db.Query(sqlStr, (ipageNo-1)*pageSize, pageSize)
+	defer rows.Close()
 	if err != nil {
 		return nil, err
 	}
@@ -173,6 +174,7 @@ func GetPageBooksByPrice(pageNo, minPrice, maxPrice string) (*model.Page, error)
 	sqlStr = "select id,title,author,price,sales,stock,img_path from books where price between ? and ? limit ?,?"
 	//执行
 	rows, err := db.Query(sqlStr, minPrice, maxPrice, (ipageNo-1)*pageSize, pageSize)
+	defer rows.Close()
 	if err != nil {
 		return nil, err
 	}

@@ -17,7 +17,7 @@ func AddCart(cart *model.Cart) error {
 	}
 	//将购物车内的购物项添加进购物项表中
 	for _, v := range cart.CartItems {
-		AddCartItem(v)
+		AddCartItem(v,cart)
 	}
 
 	return nil
@@ -63,15 +63,15 @@ func DeleteCartByCartID(cartID string) error {
 
 	_, err := tx.Exec(sqlStr, cartID)
 	if err != nil {
-		return err
 		tx.Rollback()
+		return err
 	}
 
 	sqlStr = "delete from carts where id=?"
 	_, err = tx.Exec(sqlStr, cartID)
 	if err != nil {
-		return err
 		tx.Rollback()
+		return err
 	}
 	tx.Commit()
 	return nil
